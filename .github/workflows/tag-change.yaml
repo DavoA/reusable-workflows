@@ -1,0 +1,34 @@
+name: Reusable for CD
+
+on:
+  workflow_call:
+    inputs:
+      image:
+        required: true
+        type: string
+      path:
+        required: true
+        type: string
+      filename:
+        required: true
+        type: string
+    secrets:
+      dockerhub_username:
+        required: true
+
+jobs:
+  tag-change:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+          
+      - name: Clone target repository
+        run: git clone https://github.com/DavoA/kubernetes-manifests.git
+
+      - name: Install yq
+        run: |
+          sudo wget https://github.com/mikefarah/yq/releases/download/v4.31.2/yq_linux_amd64 -O /usr/local/bin/yq
+          sudo chmod +x /usr/local/bin/yq   
