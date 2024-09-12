@@ -33,9 +33,6 @@ jobs:
           repository: DavoA/kubernetes-manifests
           token: ${{ secrets.github_pat }}
 
-      - name: check
-        run: ls
-
       - name: Configure Git
         run: |
           git config --global user.email "aristakesyandav@yandex.ru"
@@ -47,10 +44,9 @@ jobs:
           sudo chmod +x /usr/local/bin/yq 
           
       - name: Update YAML file with yq
-        working-directory: k8s-manifests
+        working-directory: kubernetes-manifests
         run: |
           yq '.spec.template.spec.containers.[0].image = "${{ secrets.dockerhub_username }}/${{inputs.image}}:${{ github.sha }}"' -i ${{inputs.path}}/${{inputs.filename}}
-        # working-directory: ./kubernetes-manifests
 
       - name: Push to destination repository
         run: |
