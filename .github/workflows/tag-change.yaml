@@ -1,4 +1,4 @@
-name: Reusable for CD
+name: Image tag change
 
 on:
   workflow_call:
