@@ -52,6 +52,7 @@ jobs:
           yq '.spec.template.spec.containers.[0].image = "${{ secrets.dockerhub_username }}/${{inputs.image}}:${{ github.sha }}"' -i ${{inputs.path}}/${{inputs.filename}}
 
       - name: Push to destination repository
+        working-directory: kubernetes-manifests
         run: |
           git remote add destination https://x-access-token:${{ secrets.github_pat }}@github.com/DavoA/kubernetes-manifests.git
           git push destination main
