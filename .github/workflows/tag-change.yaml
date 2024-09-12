@@ -15,6 +15,8 @@ on:
     secrets:
       dockerhub_username:
         required: true
+      github_pat:
+        required: true
 
 jobs:
   tag-change:
@@ -24,11 +26,32 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-          
-      - name: Clone target repository
-        run: git clone https://github.com/DavoA/kubernetes-manifests.git
+        
+      - name: Checkout source repository
+        uses: actions/checkout@v3
+        with:
+          repository: DavoA/kubernetes-manifests
+          token: ${{ secrets.github_pat }}
 
+      - name: Configure Git
+        run: |
+          git config --global user.email "aristakesyandav@yandex.ru"
+          git config --global user.name "DavoA"
+          
       - name: Install yq
         run: |
           sudo wget https://github.com/mikefarah/yq/releases/download/v4.31.2/yq_linux_amd64 -O /usr/local/bin/yq
-          sudo chmod +x /usr/local/bin/yq   
+          sudo chmod +x /usr/local/bin/yq 
+          
+      - name: Update YAML file with yq
+        working-directory: k8s-manifests
+        run: |
+          yq '.spec.template.spec.containers.[0].image = "${{ secrets.dockerhub_username }}/${{inputs.image}}:${{ github.sha }}"' -i ${{inputs.path}}/${{inputs.filename}}
+
+      - name: Push to destination repository
+        run: |
+          git remote add destination https://x-access-token:${{ secrets.github_pat }}@github.com/DavoA/kubernetes-manifests.git
+          git push destination main
+
+
+          
