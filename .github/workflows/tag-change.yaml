@@ -51,6 +51,12 @@ jobs:
         run: |
           yq '.spec.template.spec.containers.[0].image = "${{ secrets.dockerhub_username }}/${{inputs.image}}:${{ github.sha }}"' -i ${{inputs.path}}/${{inputs.filename}}
 
+      - name: Commit Changes
+        working-directory: kubernetes-manifests
+        run: |
+          git add ${{inputs.path}}/${{inputs.filename}}
+          git commit -m "Update image tag for ${{inputs.image}} to ${{ github.sha }}"
+
       - name: Push to destination repository
         working-directory: kubernetes-manifests
         run: |
